@@ -1,0 +1,147 @@
+/* =====================================================================
+   FertilitetPlus — rättningar som läggs på vid konvertering
+   Skrivs inte i Claude Design. Appliceras varje gång exporten körs om,
+   så de kan inte regrera.
+   ===================================================================== */
+
+/* --- 1. Sidhuvudet spiller ut ---------------------------------------
+   Uppmätt: skrivbordsmenyn slår på vid 1024 px men behöver 1160.
+   Mellan dem går raden 94 px utanför skärmen. Och under ~437 px
+   får innehållet inte plats alls — 23 px spill vid 390, 53 vid 360.
+   Det gav vågrät scroll på 18 av 25 sidor.                           */
+
+/* Menyn viker ihop till hamburgare först när den faktiskt får plats. */
+@media (max-width: 1199px) {
+  [data-desktop-nav] { display: none !important; }
+  [data-mobile-toggle] { display: flex !important; }
+}
+@media (min-width: 1200px) {
+  [data-mobile-toggle] { display: none !important; }
+}
+
+/* Raden ska aldrig kunna bli bredare än skärmen. */
+header > div {
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+header > div > * { min-width: 0 !important; }
+
+/* Under 480 px krymps luften och loggan så att allt ryms. */
+@media (max-width: 479px) {
+  header > div { padding-left: 16px !important; padding-right: 16px !important; gap: 10px !important; }
+  [data-header-actions] { gap: 8px !important; }
+  header [data-logotyp] svg,
+  header a[href="/"] svg { width: 34px !important; height: 34px !important; }
+  header a[href="/"] { font-size: 13px !important; }
+}
+
+/* --- 2. Tabeller på små skärmar --------------------------------------
+   Cookietabellen i integritetspolicyn tappar sin rubrikrad på mobil:
+   NAMN/FRÅN/SYFTE/LAGRAS hamnar som en lös lista högst upp, skild från
+   sina värden. Under 768 px blir varje rad ett kort i stället, med
+   etiketten inline framför värdet.                                    */
+@media (max-width: 767px) {
+  /* Rubrikraden faller till en spalt och blir en lös lista — dölj den. */
+  [data-tabellrubrik] { display: none !important; }
+  /* Varje rad blir ett kort med etiketten inline framför värdet. */
+  [data-tabellrad] {
+    display: block !important;
+    border: 1px solid rgba(58,53,48,0.12); border-radius: 4px;
+    padding: 14px 16px !important; margin-bottom: 12px;
+  }
+  [data-tabellrad] > * { display: block; padding: 3px 0; }
+  [data-tabellrad] > *[data-etikett]::before {
+    content: attr(data-etikett);
+    display: block; font-size: 11px; font-weight: 600; letter-spacing: 0.14em;
+    text-transform: uppercase; color: #7E9680; margin-bottom: 2px;
+  }
+  /* Tabeller utan etiketter får hellre scrolla än spilla ut. */
+  table { display: block; overflow-x: auto; }
+}
+
+/* --- 3. Ingen sida får orsaka vågrät scroll -------------------------- */
+html, body { overflow-x: clip; }
+
+/* --- 4. Omdömen som karusell -----------------------------------------
+   Rubriken "Recensioner" tas bort i markupen, ögonbrynet OMDÖMEN står
+   kvar. Korten ligger i en rad som scrollar i sidled och klickar på
+   plats. Första kortet i linje med innehållets vänsterkant, raden
+   fortsätter ut genom högerkanten så att det syns att det finns mer.  */
+[data-karusell] {
+  display: grid !important;
+  grid-auto-flow: column !important;
+  grid-auto-columns: min(78vw, 420px) !important;
+  gap: 24px !important;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scroll-snap-type: x mandatory;
+  scroll-padding-left: max(20px, calc((100vw - 1200px) / 2));
+  padding-inline: max(20px, calc((100vw - 1200px) / 2)) !important;
+  padding-bottom: 8px;
+  scrollbar-width: none;
+}
+[data-karusell]::-webkit-scrollbar { display: none; }
+[data-karusell] > * { scroll-snap-align: start; }
+/* Sektionen som håller karusellen får gå ut i kanterna. */
+[data-karusell-yta] { max-width: 100% !important; padding-inline: 0 !important; }
+
+/* Den som hellre har lugn rörelse ska slippa. */
+@media (prefers-reduced-motion: reduce) {
+  [data-karusell] { scroll-behavior: auto; }
+}
+
+/* =====================================================================
+   Utfällbara menyer utan React
+   ---------------------------------------------------------------------
+   Panelerna packas ut av konverteraren och ligger permanent i koden.
+   Här bestäms när de syns. Datormenyn klarar sig helt utan JavaScript;
+   bara hamburgaren behöver fp-meny.js.
+   ===================================================================== */
+
+[data-meny-grupp] > [data-meny-panel] { display: none; }
+[data-meny-grupp]:hover > [data-meny-panel],
+[data-meny-grupp]:focus-within > [data-meny-panel] { display: block; }
+
+/* Mobilpanelen: dold som standard, och aldrig synlig på dator. */
+[data-mobile-panel] { display: none !important; }
+@media (max-width: 1199px) {
+  [data-mobile-panel][data-oppen] { display: block !important; }
+}
+
+/* =====================================================================
+   Cookiebanner
+   ---------------------------------------------------------------------
+   Bannern har inline-stilar från designen, och de vinner över vanliga
+   CSS-regler. Därför !important här — annars går delarna inte att dölja.
+   Att visa dem kräver inget: då låter vi designens egna display-värden
+   gälla.
+   ===================================================================== */
+
+[data-cookie-banner][hidden] { display: none !important; }
+
+/* Inställningarna syns först när man tryckt Anpassa. */
+[data-cookie-banner]:not([data-lage="installningar"]) [data-kategorier],
+[data-cookie-banner]:not([data-lage="installningar"]) [data-kategorier-knappar] {
+  display: none !important;
+}
+
+/* ...och då försvinner huvudvalet. */
+[data-cookie-banner][data-lage="installningar"] [data-huvudval] {
+  display: none !important;
+}
+
+/* På små skärmar ska bannern gå kant i kant längst ner. */
+@media (max-width: 599px) {
+  [data-cookie-banner] {
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    border-radius: 0 !important;
+    border-left: 0 !important;
+    border-right: 0 !important;
+    border-bottom: 0 !important;
+    max-height: 85vh !important;
+  }
+}
