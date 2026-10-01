@@ -389,35 +389,57 @@ img[width][height] { height: auto; }
    Knappen under korten är kvar — den leder till sidan med alla omdömen,
    inte till resten av ett avklippt stycke. */
 
-/* Raden under korten: länken till vänster, pilarna till höger. Raden
-   byggs av fp-omdomen.js — finns inte skriptet står länken ensam, och
-   stilarna nedan skadar inget. */
+/* Raden under korten bär länken. Pilarna sitter inte här utan på
+   sektionens kanter — se nedan. Raden byggs av fp-omdomen.js; finns inte
+   skriptet står länken ensam och stilarna skadar inget. */
 [data-omdomesrad] {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 24px;
-  margin: 32px 0 0;
+  margin: 24px 0 0;
 }
-[data-omdomesknappar] { display: flex; gap: 10px; }
+
+/* Pilarna ligger ovanpå kortens vänstra och högra kant, lodrätt mitt för
+   kortet. Höjden sätts av fp-omdomen.js, som mäter karusellen — den är
+   olika hög i olika bredder och ett tal i CSS hade bara kunnat bli fel.
+
+   De låg först under korten, bredvid länken. Då hamnade de utanför
+   skärmen tillsammans med kortets nederkant, och syntes inte förrän man
+   redan scrollat förbi det man skulle scrolla i. */
+[data-karusell-yta] { position: relative; }
+
+[data-omdomesknappar] {
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  display: flex;
+  justify-content: space-between;
+  pointer-events: none;   /* bara knapparna ska fånga klick, inte ytan */
+  z-index: 2;
+}
 [data-omdomesrad][data-kan-scrolla="nej"] [data-omdomesknappar] { display: none; }
 
 [data-omdomespil] {
+  pointer-events: auto;
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  border: 1px solid rgb(200, 181, 162);
-  background: transparent;
+  border: 1px solid rgba(58, 53, 48, 0.12);
+  /* Pilen ligger ibland över ett foto, ibland över kortets sandfärg.
+     Bakgrunden måste täcka båda. */
+  background: rgba(248, 246, 242, 0.94);
+  box-shadow: 0 1px 6px rgba(58, 53, 48, 0.12);
   color: rgb(58, 53, 48);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   padding: 0;
-  transition: background-color .15s, opacity .15s;
+  transform: translateY(-50%);
+  transition: opacity .15s, background-color .15s;
 }
-[data-omdomespil]:hover:not(:disabled) { background: rgb(235, 231, 225); }
-[data-omdomespil]:disabled { opacity: .3; cursor: default; }
+[data-omdomespil]:hover:not(:disabled) { background: rgb(255, 255, 255); }
+[data-omdomespil]:disabled { opacity: 0; pointer-events: none; }
 [data-omdomespil]:focus-visible { outline: 2px solid rgb(126, 150, 128); outline-offset: 2px; }
 
 /* Länken under korten. */
@@ -473,7 +495,30 @@ img[width][height] { height: auto; }
     max-height: 300px !important;
   }
 
-  [data-omdomesrad] { padding-inline: 24px; }
+  [data-omdomesrad] { padding-inline: 24px; padding-block: 0 !important; margin-top: 20px !important; }
+
+  /* 256 px ren luft, borttagen.
+
+     Sidans egen CSS ger sektionens barn `padding: 64px 24px` på mobil.
+     Karusellen fick därmed 64 px över och under korten, och raden under
+     dem lika mycket — nästan en tredjedels skärm luft som ingen bett om.
+     Sektionens egen luft dras samtidigt ner från 64 till 48. */
+  [data-karusell-yta] { padding-block: 48px !important; }
+  [data-karusell][data-karusell][data-karusell] { padding-block: 0 8px !important; }
+
+  /* DET LÄNGSTA OMDÖMET VISAS INTE HÄR.
+
+     Marijas omdöme är 936 tecken — 2,7 gånger de andra — och sätter hela
+     karusellradens höjd, eftersom en rad alltid är lika hög som sitt
+     högsta kort. Med det kortet med blir sektionen 983 px och ryms inte
+     på en telefonskärm; utan det blir den 670 px och gör det.
+
+     Det går inte förlorat: knappen "Läs alla omdömen" leder till
+     /pages/omdomen där alla fyra står hela. På dator visas alla fyra.
+
+     OBS: regeln pekar ut kort nummer tre i markupen. Byts omdömena ut är
+     det inte längre det längsta — kontrollera då vilket som är det. */
+  [data-omdomeskort]:nth-of-type(3) { display: none !important; }
 }
 
 /* ORDNINGEN.

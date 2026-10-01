@@ -54,6 +54,12 @@
       return;
     }
 
+    /* Pilarna ligger ovanpå kortens kanter, inte i raden under dem. De
+       hängs därför i sektionen (som är position: relative) och inte i
+       raden — men `data-kan-scrolla` sätts på raden, och CSS-regeln som
+       döljer dem utgår från den, så raden måste vara deras förälder i
+       DOM:en. Lösningen: de ligger i raden, men positioneras absolut mot
+       sektionen. */
     var knappar = document.createElement("div");
     knappar.setAttribute("data-omdomesknappar", "");
     var bak = pil("bak");
@@ -61,6 +67,16 @@
     knappar.appendChild(bak);
     knappar.appendChild(fram);
     rad.appendChild(knappar);
+
+    var yta = kar.closest("[data-karusell-yta]") || kar.parentNode;
+
+    /* Lodrät placering: mitt för karusellen. Karusellen är olika hög i
+       olika bredder, så höjden mäts i stället för att skrivas i CSS. */
+    function placera() {
+      var y = kar.getBoundingClientRect();
+      var s = yta.getBoundingClientRect();
+      knappar.style.top = Math.round(y.top - s.top + y.height / 2) + "px";
+    }
 
     function steg() {
       var k = kar.querySelector("[data-omdomeskort]");
@@ -91,11 +107,16 @@
       kar.scrollBy({ left: tecken * steg(), behavior: "smooth" });
     }
 
+    function allt() { uppdatera(); placera(); }
+
     bak.addEventListener("click", function () { flytta(-1); });
     fram.addEventListener("click", function () { flytta(1); });
     kar.addEventListener("scroll", uppdatera, { passive: true });
-    window.addEventListener("resize", uppdatera);
-    uppdatera();
+    window.addEventListener("resize", allt);
+    /* Korten blir högre när bilderna laddat; placeringen mäts om då. */
+    window.addEventListener("load", allt);
+    if (window.ResizeObserver) new ResizeObserver(allt).observe(kar);
+    allt();
   }
 
   if (document.readyState === "loading") {
