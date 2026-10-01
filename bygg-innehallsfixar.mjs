@@ -119,6 +119,16 @@ export const REGLER = [
     nivaer: 1,
     varfor: "Tas bort ur 'Innan du bokar' enligt Maries markering.",
   },
+  {
+    sida: "pages/samarbeten.html",
+    namn: "Specialistkortet Rika Hammarström",
+    /* Ankaret är kortets brödtext, inte namnet: "Hammarström" står fyra
+       gånger i filen — i bildens alt, i rubriken och två gånger i texten.
+       Den här meningen står en gång. */
+    text: "är specialistutbildad gynekolog med över 39 års erfarenhet",
+    nivaer: 1,
+    varfor: "Ska inte stå med bland specialisterna enligt Marie.",
+  },
 ];
 
 /* ------------------------------------------------------------------ *
