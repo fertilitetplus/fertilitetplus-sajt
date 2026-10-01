@@ -359,22 +359,23 @@ img[width][height] { height: auto; }
 
    Tre ändringar:
 
-   1. Ingenting scrollar inuti ett kort längre. Texten kapas vid ett helt
-      antal rader, och en länk under korten går till sidan där omdömena
-      står hela.
+   1. Ingenting döljs. Varken scroll inuti kortet eller kapning med "…".
+      Ett avklippt omdöme ser oavslutat ut, och poängen med ett omdöme är
+      att man ska kunna läsa klart det.
 
-   2. Ingen fast korthöjd. Rutnätet sträcker korten i en rad till samma
-      höjd av sig självt; en siffra i CSS kan bara bli fel när texterna
-      byts ut.
+   2. Ingen fast korthöjd, och inga sträckta kort. Varje kort är så högt
+      som sin egen text. Ett sträckt kort får tom kortyta i botten när
+      grannen är längre, och tom kortyta ser ut som ett fel.
 
    3. På skärmar över 900 px är det ingen karusell. Det finns fyra
       omdömen; de får plats två och två. Då är ingenting klippt i sidled
       heller, och den halvsynliga kanten som såg ut som ett fel är borta.
       Karusellen är kvar på mobil, där den hör hemma.
 
-   Radantalen är satta efter de fyra omdömen som finns: tre av fyra ryms
-   i sin helhet, bara det längsta kapas. Byts texterna ut kan de behöva
-   ses över.
+   Första försöket kapade det längsta omdömet vid åtta rader och satte
+   "…" på slutet. Det var sämre: ett avklippt omdöme ser oavslutat ut.
+   Nu visas alla fyra i sin helhet, och knappen under korten leder till
+   sidan med alla omdömen — inte till resten av en mening.
 
    Blocket ligger sist i filen med flit: det ska väga tyngre än
    karusellreglerna längre upp.
@@ -383,14 +384,11 @@ img[width][height] { height: auto; }
 [data-omdomeskort] { height: auto !important; }
 [data-omdomestext] { overflow: visible !important; }
 
-/* Citatet kapas vid raden, aldrig mitt i en rad. */
-[data-omdomestext] > p + p {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 12;
-  line-clamp: 12;
-  overflow: hidden;
-}
+/* Ingen kapning. Ett omdöme som slutar med "…" ser oavslutat ut, och det
+   var hela invändningen mot den gamla lösningen: man vill kunna läsa klart
+   det som står. Korten får i stället vara så höga som texten kräver.
+   Knappen under korten är kvar — den leder till sidan med alla omdömen,
+   inte till resten av ett avklippt stycke. */
 
 /* Länken under korten. */
 [data-omdomeslank] {
@@ -405,8 +403,11 @@ img[width][height] { height: auto; }
 [data-omdomeslank]:hover { text-decoration: underline; }
 
 @media (max-width: 900px) {
-  /* Korten i karusellen sträcks till samma höjd av rutnätet. */
-  [data-karusell][data-karusell][data-karusell] { align-items: stretch !important; }
+  /* Varje kort är så högt som sin egen text, inte så högt som det
+     längsta. Med sträckta kort fick det kortaste omdömet 600 px tom
+     kortyta under sig; nu slutar kortet där texten slutar och resten är
+     sidans bakgrund. */
+  [data-karusell][data-karusell][data-karusell] { align-items: start !important; }
   [data-omdomeslank] { padding-inline: 24px; }
 }
 
@@ -416,15 +417,16 @@ img[width][height] { height: auto; }
     grid-auto-flow: row !important;
     grid-template-columns: repeat(2, 1fr) !important;
     grid-auto-columns: auto !important;
-    align-items: stretch !important;
+    align-items: start !important;
     gap: 32px !important;
     overflow-x: visible !important;
     scroll-snap-type: none !important;
     padding-inline: 0 !important;
     padding-bottom: 0 !important;
   }
-  /* Bredare kort rymmer fler tecken per rad — färre rader behövs. */
-  [data-omdomestext] > p + p { -webkit-line-clamp: 8; line-clamp: 8; }
+  /* Inga sträckta kort. Ett sträckt kort får tom kortyta i botten när
+     grannen är längre, och tom kortyta ser ut som ett fel. Ett kort som
+     slutar där texten slutar gör det inte. */
   /* Sektionen får tillbaka sin vanliga bredd; den gjordes helbred för
      att karusellen skulle kunna gå ut i kanterna. */
   [data-karusell-yta] { max-width: 1600px !important; }
