@@ -51,7 +51,7 @@ import path from "node:path";
 const DOMAN = "https://fertilitetplus.se";
 
 /* --- Stilvokabulär, hämtad ur de byggda sidorna ------------------- */
-const S = {
+export const S = {
   sektion: "max-width: 1600px; margin: 0px auto; padding: 112px 40px 64px;",
   sektionTat: "max-width: 1600px; margin: 0px auto; padding: 0px 40px 96px;",
   ogonbryn:
@@ -83,7 +83,7 @@ const S = {
     "letter-spacing: 0.04em; text-decoration: none; display: inline-block;",
 };
 
-const rutnat = (minsta) =>
+export const rutnat = (minsta) =>
   `display: grid; grid-template-columns: repeat(auto-fit, minmax(${minsta}px, 1fr)); gap: 24px;`;
 
 /* --- Innehållet, ett block per språk ------------------------------ */
@@ -383,7 +383,7 @@ function scBlock(html, namn) {
  * oss" stod kvar överst på den engelska sidan. Antalet omslag runt
  * huvudet är inget att gissa på; här räknas taggarna i stället.
  */
-function bytMitten(skal, nytt) {
+export function bytMitten(skal, nytt) {
   const huvud = scBlock(skal, "Sidhuvud");
   const sidfot = scBlock(skal, "Sidfot");
   if (sidfot.start <= huvud.slut) throw new Error("sidfoten ligger före huvudet");
