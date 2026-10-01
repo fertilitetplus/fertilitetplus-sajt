@@ -233,37 +233,19 @@ export const SIDOR = {
 
 export const ADRESSER = [SIDOR.sv.adress, SIDOR.en.adress];
 
-/* Språkväxlaren.
+/* Ingen språkväxlare.
 
-   Den togs bort en stund, när båda sidorna bara nåddes via den länk
-   kliniken skickade — då var språket redan valt åt besökaren. Nu ligger
-   den svenska sidan i huvudmenyn, och då behövs den igen: den som
-   kommer in via menyn och hellre läser engelska ska kunna byta.
+   Den har varit här två gånger och tagits bort två gånger. Skälet är
+   detsamma båda gångerna: sidorna nås bara via den länk kliniken
+   utomlands skickar, och den länken är redan på rätt språk. En växel
+   bjuder in besökaren att byta till ett språk hon inte bad om, och gör
+   två raka landningssidor till en liten webbplats.
 
-   Ett par länkar, inte en meny: två språk behöver ingen rullgardin. Den
-   man står på är inte klickbar — annars är det oklart vilken som gäller.
-   Växeln sitter på BÅDA sidorna, så att dörren går åt två håll. */
-function sprakvaxel(aktivt) {
-  const aktiv =
-    "font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; " +
-    "color: rgb(58, 53, 48);";
-  const passiv =
-    "font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; " +
-    "color: rgba(58, 53, 48, 0.55); text-decoration: none;";
-  const delare = "font-size: 12px; color: rgba(58, 53, 48, 0.3); margin: 0px 10px;";
+   Kopplingen dem emellan ligger i hreflang, som bara Google läser.
 
-  const del = (sprak) =>
-    sprak === aktivt
-      ? `<span style="${aktiv}" aria-current="true">${SIDOR[sprak].namn}</span>`
-      : `<a href="${SIDOR[sprak].adress}" hreflang="${sprak}" lang="${sprak}" ` +
-        `style="${passiv}">${SIDOR[sprak].namn}</a>`;
-
-  return (
-    `<div data-fp-sprakvaxel style="max-width: 1600px; margin: 0px auto; ` +
-    `padding: 28px 40px 0px; display: flex; align-items: center;">` +
-    del("sv") + `<span style="${delare}" aria-hidden="true">·</span>` + del("en") + `</div>`
-  );
-}
+   (Den kom tillbaka en stund den 1 oktober, när den svenska sidan
+   provades i huvudmenyn. Menyn pekades tillbaka samma kväll, och då föll
+   skälet för växeln bort igen.) */
 
 function innehall(sprak) {
   const d = SIDOR[sprak];
@@ -298,10 +280,9 @@ function innehall(sprak) {
   ).join("");
 
   return (
-    sprakvaxel(sprak) +
-
-    /* Nedkortad toppmarginal: växlaren ovanför bär resten av luften. */
-    `<section style="${S.sektion} padding-top: 44px;">` +
+    /* Full toppmarginal: utan växlare ovanför ska sidan börja som alla
+       andra sidor på sajten. */
+    `<section style="${S.sektion}">` +
     `<p style="${S.ogonbryn}">${d.ogonbryn}</p>` +
     `<h1 style="${S.h1}">${d.h1}</h1>` +
     `<p style="${S.ingress}">${d.ingress}</p>` +

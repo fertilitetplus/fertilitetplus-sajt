@@ -299,17 +299,20 @@ async function* htmlfiler(katalog) {
  * på den allmänna sidan — det är den som är deras ämne. Bara länkar med
  * menyns egen etikett byts, och etiketten är unik för menyn och sidfoten.
  * ------------------------------------------------------------------ */
-export const MENYLANKAR = [
-  {
-    namn: "Menyvalet IVF & utlandsbehandlingar",
-    etikett: "IVF &amp; utlandsbehandlingar",
-    fran: "/pages/provtagning-infor-behandling-utomlands",
-    till: "/pages/fertilitetplus-x-utlandsbehandling",
-    /* 3 länkar per sida (skrivbordsmeny, mobilmeny, sidfot) × 25 sidor. */
-    vantat: 75,
-  },
-];
+/* Tom: inga menylänkar pekas om just nu.
 
+   Här låg en stund en regel som pekade om menyvalet "IVF &
+   utlandsbehandlingar" från den allmänna utlandssidan till den svenska
+   remissidan. Den backades samma kväll — remissidorna ska vara interna
+   och nås bara via klinikens direktlänk, och menyn ska peka på den
+   allmänna sidan.
+
+   Maskineriet står kvar eftersom det är svårt att få rätt: en menylänk
+   kan inte pekas om med ett rakt sök-och-ersätt på adressen, för samma
+   adress står också i brödtextlänkar inne på enskilda sidor som ska peka
+   kvar. Regeln byter bara länkar vars ankartext är menyns egen etikett,
+   och räknar så att den säger till om menyn ändrats i Claude Design. */
+export const MENYLANKAR = [];
 export async function riktaOmMenylankar(rot, lankar = MENYLANKAR) {
   const rapport = [];
 
