@@ -447,22 +447,30 @@ img[width][height] { height: auto; }
         så att det första kortet man möter är ett kort man hinner läsa. */
   [data-karusell][data-karusell][data-karusell] { align-items: stretch !important; }
 
+  /* Luften i de korta korten läggs jämnt över och under texten, i
+     stället för att samlas i botten. Ett kort med lika mycket luft runt
+     texten ser luftigt ut; samma luft i en klump under texten ser ut som
+     att något fattas. */
   [data-omdomestext] {
     display: flex !important;
     flex-direction: column !important;
-    flex: none !important;
+    justify-content: center !important;
+    flex: 1 1 auto !important;
   }
   [data-omdomestext] > p + p {
     font-size: 14px !important;
     line-height: 1.6 !important;
   }
 
-  /* Bilden tar överskottet. min/max håller den inom rimliga proportioner
-     — utan tak blev det kortaste omdömets bild en 500 px hög remsa. */
+  /* Bilden tar en del av överskottet, men inte allt. Utan tak växte det
+     kortaste kortets bild till 490 px: en 16:9-bild beskuren till en hög
+     smal remsa, där motivet kan hamna utanför. 300 px är ungefär en
+     kvadrat på ett 320 px brett kort. */
   [data-omdomesbild] {
     flex: 1 1 auto !important;
     height: auto !important;
-    min-height: 150px !important;
+    min-height: 180px !important;
+    max-height: 300px !important;
   }
 
   [data-omdomesrad] { padding-inline: 24px; }
