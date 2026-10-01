@@ -266,6 +266,80 @@ export const INFOGNINGAR = [
   },
 ];
 
+/** Alla HTML-filer under en katalog. */
+async function* htmlfiler(katalog) {
+  for (const p of await fs.readdir(katalog, { withFileTypes: true })) {
+    if (p.name === ".git" || p.name === "node_modules") continue;
+    const full = path.join(katalog, p.name);
+    if (p.isDirectory()) yield* htmlfiler(full);
+    else if (p.name.endsWith(".html")) yield full;
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * Menylänkar som pekas om.
+ * ------------------------------------------------------------------
+ * Menyn ritas i Claude Design och ligger inbakad i varje sida, så en
+ * ändrad måladress måste göras här tills den är gjord i designen. Det är
+ * alltså en skuld, precis som reglerna ovan.
+ *
+ * Varför inte ett rakt sök-och-ersätt på adressen: den gamla adressen
+ * står 80 gånger i bygget, och fem av dem är brödtextlänkar inne på
+ * enskilda sidor ("läs mer om utlandsbehandling"). De ska fortsätta peka
+ * på den allmänna sidan — det är den som är deras ämne. Bara länkar med
+ * menyns egen etikett byts, och etiketten är unik för menyn och sidfoten.
+ * ------------------------------------------------------------------ */
+export const MENYLANKAR = [
+  {
+    namn: "Menyvalet IVF & utlandsbehandlingar",
+    etikett: "IVF &amp; utlandsbehandlingar",
+    fran: "/pages/provtagning-infor-behandling-utomlands",
+    till: "/pages/fertilitetplus-x-utlandsbehandling",
+    /* 3 länkar per sida (skrivbordsmeny, mobilmeny, sidfot) × 25 sidor. */
+    vantat: 75,
+  },
+];
+
+export async function riktaOmMenylankar(rot, lankar = MENYLANKAR) {
+  const rapport = [];
+
+  for (const r of lankar) {
+    const re = new RegExp(
+      `(<a[^>]*href=")${r.fran.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}("[^>]*>)${
+        r.etikett.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+      }(</a>)`,
+      "g"
+    );
+
+    let totalt = 0;
+    for await (const fil of htmlfiler(rot)) {
+      const h = await fs.readFile(fil, "utf8");
+      let antal = 0;
+      const ny = h.replace(re, (_, a, b, c) => {
+        antal++;
+        return `${a}${r.till}${b}${r.etikett}${c}`;
+      });
+      if (antal) {
+        await fs.writeFile(fil, ny, "utf8");
+        totalt += antal;
+      }
+    }
+
+    /* Samma spärr som på textbytena: hittar regeln inte det den väntar
+       sig har menyn ändrats, och då ska den säga till i stället för att
+       tyst göra halva jobbet. */
+    rapport.push({
+      namn: r.namn,
+      resultat:
+        totalt === r.vantat
+          ? `${totalt} länkar ompekade`
+          : `VARNING — pekade om ${totalt}, väntade ${r.vantat}`,
+    });
+  }
+
+  return rapport;
+}
+
 export async function laggPaInfogningar(rot, infogningar = INFOGNINGAR) {
   const rapport = [];
 
