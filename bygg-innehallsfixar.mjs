@@ -126,6 +126,24 @@ export const REGLER = [
  * ------------------------------------------------------------------ */
 
 /** Elementet med namnet `tagg` som omsluter `pos`. */
+/**
+ * Slutet på elementet som bär ett visst attribut, t.ex. `data-karusell`.
+ *
+ * Behövs för att lägga något EFTER ett helt block, inte efter det kort
+ * som råkar innehålla ankartexten. `omslutandeTagg` nedan klättrar till
+ * närmaste tagg av ett visst namn; den här pekar direkt på ett utpekat
+ * block och räknar sig fram till dess balanserade slut.
+ */
+function blockMedAttribut(html, attribut) {
+  const i = html.indexOf(attribut);
+  if (i === -1) return null;
+  const start = html.lastIndexOf("<", i);
+  if (start === -1) return null;
+  const slut = taggSlut(html, start);
+  if (slut === -1) return null;
+  return { start, slut };
+}
+
 function omslutandeTagg(html, pos, tagg) {
   let i = html.lastIndexOf(`<${tagg}`, pos);
   while (i !== -1) {
@@ -235,6 +253,17 @@ export const INFOGNINGAR = [
     finnsRedan: "Aagaard Fertilitetsklinik",
     html: AAGAARD_KORT,
   },
+  {
+    sida: "index.html",
+    namn: "Länk till alla omdömen",
+    /* Läggs efter hela karusellblocket, inte efter ett kort. Omdömena
+       kapas numera vid åtta rader i stället för att scrolla inuti kortet
+       (se fp-fixar.css), och då måste det finnas en väg till resten. */
+    efterBlocket: 'data-karusell=""',
+    finnsRedan: "data-omdomeslank",
+    html:
+      `<a href="/pages/omdomen" data-omdomeslank="">Läs alla omdömen →</a>`,
+  },
 ];
 
 export async function laggPaInfogningar(rot, infogningar = INFOGNINGAR) {
@@ -251,11 +280,18 @@ export async function laggPaInfogningar(rot, infogningar = INFOGNINGAR) {
       continue;
     }
 
-    const pos = h.indexOf(r.text);
-    if (pos === -1) { rapport.push({ namn: r.namn, resultat: "ingen träff" }); continue; }
-
-    const el = omslutandeTagg(h, pos, r.tagg);
-    if (!el) { rapport.push({ namn: r.namn, resultat: `HITTADE INGET <${r.tagg}>` }); continue; }
+    /* Två sätt att peka ut platsen: ett utpekat block (efterBlocket),
+       eller en ankartext plus den tagg som omsluter den. */
+    let el;
+    if (r.efterBlocket) {
+      el = blockMedAttribut(h, r.efterBlocket);
+      if (!el) { rapport.push({ namn: r.namn, resultat: `HITTADE INGET BLOCK ${r.efterBlocket}` }); continue; }
+    } else {
+      const pos = h.indexOf(r.text);
+      if (pos === -1) { rapport.push({ namn: r.namn, resultat: "ingen träff" }); continue; }
+      el = omslutandeTagg(h, pos, r.tagg);
+      if (!el) { rapport.push({ namn: r.namn, resultat: `HITTADE INGET <${r.tagg}>` }); continue; }
+    }
 
     const vid = r.var === "fore" ? el.start : el.slut;
     h = h.slice(0, vid) + r.html + h.slice(vid);

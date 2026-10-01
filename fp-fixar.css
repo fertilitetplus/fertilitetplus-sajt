@@ -345,25 +345,88 @@ img[width][height] { height: auto; }
   [data-karusell][data-karusell][data-karusell] { padding-inline: 80px !important; }
 }
 
-/* ── Varukorgens antal ──────────────────────────────────────────────
-   Siffran som fp-korg.js lägger i varukorgslänken när besökaren har
-   något liggande hos Shopify. Salvia är brandbokens accentfärg och
-   används här för att det är en upplysning som ska synas, inte en
-   varning. */
-[data-fp-korgantal] {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 19px;
-  height: 19px;
-  padding: 0 5px;
-  margin-left: 6px;
-  background: #7E9680;
-  color: #fff;
-  border-radius: 10px;
-  font-size: 11px;
-  font-weight: 700;
-  line-height: 1;
-  letter-spacing: 0;
-  flex: 0 0 auto;
+/* =====================================================================
+   Omdömen, omgjort 2026-10-01
+   ---------------------------------------------------------------------
+   Det som stod här innan gav alla kort samma höjd och lät den text som
+   inte fick plats scrolla inuti kortet. Höjdskillnaden försvann, men ett
+   värre problem tog dess plats: en 300 px hög ruta med 700 px text i,
+   utan synlig rullningslist, inuti en karusell som också scrollar.
+
+   Marijas omdöme visade mindre än halva texten. Ingenting på skärmen
+   berättade att resten fanns. Alla fyra korten var klippta — även det
+   kortaste, med tio pixlar.
+
+   Tre ändringar:
+
+   1. Ingenting scrollar inuti ett kort längre. Texten kapas vid ett helt
+      antal rader, och en länk under korten går till sidan där omdömena
+      står hela.
+
+   2. Ingen fast korthöjd. Rutnätet sträcker korten i en rad till samma
+      höjd av sig självt; en siffra i CSS kan bara bli fel när texterna
+      byts ut.
+
+   3. På skärmar över 900 px är det ingen karusell. Det finns fyra
+      omdömen; de får plats två och två. Då är ingenting klippt i sidled
+      heller, och den halvsynliga kanten som såg ut som ett fel är borta.
+      Karusellen är kvar på mobil, där den hör hemma.
+
+   Radantalen är satta efter de fyra omdömen som finns: tre av fyra ryms
+   i sin helhet, bara det längsta kapas. Byts texterna ut kan de behöva
+   ses över.
+
+   Blocket ligger sist i filen med flit: det ska väga tyngre än
+   karusellreglerna längre upp.
+   ===================================================================== */
+
+[data-omdomeskort] { height: auto !important; }
+[data-omdomestext] { overflow: visible !important; }
+
+/* Citatet kapas vid raden, aldrig mitt i en rad. */
+[data-omdomestext] > p + p {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 12;
+  line-clamp: 12;
+  overflow: hidden;
+}
+
+/* Länken under korten. */
+[data-omdomeslank] {
+  display: block;
+  margin: 32px 0 0;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: rgb(126, 150, 128);
+  text-decoration: none;
+}
+[data-omdomeslank]:hover { text-decoration: underline; }
+
+@media (max-width: 900px) {
+  /* Korten i karusellen sträcks till samma höjd av rutnätet. */
+  [data-karusell][data-karusell][data-karusell] { align-items: stretch !important; }
+  [data-omdomeslank] { padding-inline: 24px; }
+}
+
+@media (min-width: 901px) {
+  /* Ingen karusell: fyra kort, två kolumner, allt synligt. */
+  [data-karusell][data-karusell][data-karusell] {
+    grid-auto-flow: row !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    grid-auto-columns: auto !important;
+    align-items: stretch !important;
+    gap: 32px !important;
+    overflow-x: visible !important;
+    scroll-snap-type: none !important;
+    padding-inline: 0 !important;
+    padding-bottom: 0 !important;
+  }
+  /* Bredare kort rymmer fler tecken per rad — färre rader behövs. */
+  [data-omdomestext] > p + p { -webkit-line-clamp: 8; line-clamp: 8; }
+  /* Sektionen får tillbaka sin vanliga bredd; den gjordes helbred för
+     att karusellen skulle kunna gå ut i kanterna. */
+  [data-karusell-yta] { max-width: 1600px !important; }
+  [data-karusell-rubrik] { padding-inline: 0 !important; }
 }
