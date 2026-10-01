@@ -67,10 +67,23 @@ html, body { overflow-x: clip; }
    kvar. Korten ligger i en rad som scrollar i sidled och klickar på
    plats. Första kortet i linje med innehållets vänsterkant, raden
    fortsätter ut genom högerkanten så att det syns att det finns mer.  */
-[data-karusell] {
+/* Upprepad attributselektor för att höja specificiteten. Sidans egen CSS
+   har under 900 px regeln
+
+     [style*="grid-template-columns"]:not([style*="auto-fit"])
+       { grid-template-columns: 1fr !important; }
+
+   som är till för att stapla rutnät på mobil. Den träffar karusellen också
+   och väger tyngre än en ensam [data-karusell]. Resultatet blev att första
+   kortet hamnade i mallens enda kolumn och klämdes till noll bredd medan
+   övriga kort blev implicita kolumner med rätt mått. */
+[data-karusell][data-karusell][data-karusell] {
   display: grid !important;
   grid-auto-flow: column !important;
-  grid-auto-columns: min(78vw, 420px) !important;
+  /* Mallen måste bort helt: grid-auto-columns gäller bara kolumner
+     UTÖVER mallen, så med en mall kvar får de första korten fel bredd. */
+  grid-template-columns: none !important;
+  grid-auto-columns: clamp(280px, 82vw, 380px) !important;
   gap: 24px !important;
   overflow-x: auto;
   overscroll-behavior-inline: contain;
