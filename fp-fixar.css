@@ -145,3 +145,122 @@ html, body { overflow-x: clip; }
     max-height: 85vh !important;
   }
 }
+
+/* =====================================================================
+   Prislistan
+   ---------------------------------------------------------------------
+   Filtret och utfällningarna sköttes av React i designen. Här bestäms
+   hur de ser ut; fp-prislista.js sköter klicken.
+
+   !important genomgående: knapparnas utseende ligger som inline-stilar
+   från designen, och bara en av de två varianterna (vald/ovald) finns
+   kvar i den statiska koden. Reglerna nedan normaliserar båda hållen så
+   att rätt knapp ser vald ut oavsett vad som råkade renderas.
+   ===================================================================== */
+
+[data-filter] {
+  background: transparent !important;
+  color: #3A3530 !important;
+  border: 1px solid #C8B5A2 !important;
+  font-weight: 500 !important;
+}
+[data-filter][data-aktiv] {
+  background: #3A3530 !important;
+  color: #F8F6F2 !important;
+  border-color: #3A3530 !important;
+  font-weight: 600 !important;
+}
+[data-filter]:hover { border-color: #3A3530 !important; }
+
+/* Bortfiltrerade tjänster och tomma grupper. */
+[data-tjanst][hidden], [data-grupp][hidden] { display: none !important; }
+
+/* Utfällningen under "Läs mer". */
+[data-mer-panel] { display: none !important; }
+[data-mer-panel][data-oppen] { display: flex !important; }
+
+/* =====================================================================
+   Rättningar efter genomgång på mobil 2026-09-30
+   ---------------------------------------------------------------------
+   Fyra fel Marie hittade i förhandsvisningen. Alla ligger här och inte i
+   designen, så att de läggs på automatiskt vid varje bygge.
+   ===================================================================== */
+
+/* --- 1. Bokningsknappen satt kant i kant mot innehållet ovanför ------ */
+[data-prisrad] {
+  margin-top: 40px !important;
+  padding-top: 8px;
+}
+
+/* --- 2. Startsidans första vy på mobil ------------------------------
+   Bilden tog så mycket höjd att ögonbryn, rubrik och brödtext hamnade
+   under vikningen. Telefonens adressfält och verktygsrad äter dessutom
+   omkring 150 px som en mätning i webbläsaren inte ser. Bilden kortas
+   och luften mellan bild och text stramas åt. */
+@media (max-width: 640px) {
+  section[data-hero] img {
+    height: 200px !important;
+    aspect-ratio: auto !important;
+    object-fit: cover !important;
+  }
+  section[data-hero] {
+    gap: 24px !important;
+    padding-bottom: 56px !important;
+  }
+}
+
+/* --- 3. Omdömeskarusellen -------------------------------------------
+   Korten var 838–2199 px höga eftersom de växte med textens längd.
+   Nu har alla samma mått, bilden ligger kant i kant överst, och den
+   text som inte får plats scrollar inuti kortet i stället för att
+   trycka ner hela sidan. */
+[data-omdomeskort] {
+  display: flex !important;
+  flex-direction: column !important;
+  height: 460px !important;
+}
+[data-omdomesbild] {
+  flex: none !important;
+  display: block !important;
+  width: 100% !important;
+  height: 180px !important;
+  aspect-ratio: auto !important;
+  object-fit: cover !important;
+  margin: 0 !important;
+}
+[data-omdomestext] {
+  flex: 1 1 auto !important;
+  overflow-y: auto !important;
+  padding: 24px 26px 26px !important;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+/* Diskret markering av att texten går att scrolla. */
+[data-omdomestext] { scrollbar-width: thin; scrollbar-color: rgba(58,53,48,0.25) transparent; }
+[data-omdomestext]::-webkit-scrollbar { width: 4px; }
+[data-omdomestext]::-webkit-scrollbar-thumb { background: rgba(58,53,48,0.25); border-radius: 2px; }
+
+@media (min-width: 900px) {
+  [data-omdomeskort] { height: 520px !important; }
+  [data-omdomesbild] { height: 220px !important; }
+}
+
+/* --- 4. Partnerkorten ------------------------------------------------
+   Kortet låg som en ljus platta ovanpå den mörkare sektionsfärgen, och
+   logotypen hade dessutom en egen ram. Två lager för mycket. Kortet blir
+   genomskinligt och ramen försvinner; multiply gör att logotypernas vita
+   bakgrund smälter in i sektionsfärgen i stället för att bli en vit ruta. */
+[data-partnerkort] { background: transparent !important; }
+[data-partnerlogga] {
+  border: 0 !important;
+  border-radius: 0 !important;
+  /* Får logotypens vita filbakgrund att smälta in i sektionsfärgen.
+     Används bara på kvadratiska logotyper — på ett fotografi skulle det
+     mörka ner bilden. */
+  mix-blend-mode: multiply;
+}
+
+/* Porträtt: bara ramen bort, ingen blandning och ingen ändrad bakgrund. */
+[data-personbild] {
+  border: 0 !important;
+}
