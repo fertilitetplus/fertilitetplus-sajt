@@ -360,22 +360,21 @@ img[width][height] { height: auto; }
    Tre ändringar:
 
    1. Ingenting döljs. Varken scroll inuti kortet eller kapning med "…".
-      Ett avklippt omdöme ser oavslutat ut, och poängen med ett omdöme är
-      att man ska kunna läsa klart det.
+      Ett avklippt omdöme ser oavslutat ut, och det var hela poängen med
+      omdömet från början — att man ska kunna läsa klart det.
 
    2. Ingen fast korthöjd, och inga sträckta kort. Varje kort är så högt
       som sin egen text. Ett sträckt kort får tom kortyta i botten när
-      grannen är längre, och tom kortyta ser ut som ett fel.
+      grannen är längre, och tom kortyta ser ut som ett fel; ett kort som
+      slutar där texten slutar gör det inte.
 
    3. På skärmar över 900 px är det ingen karusell. Det finns fyra
       omdömen; de får plats två och två. Då är ingenting klippt i sidled
       heller, och den halvsynliga kanten som såg ut som ett fel är borta.
       Karusellen är kvar på mobil, där den hör hemma.
 
-   Första försöket kapade det längsta omdömet vid åtta rader och satte
-   "…" på slutet. Det var sämre: ett avklippt omdöme ser oavslutat ut.
-   Nu visas alla fyra i sin helhet, och knappen under korten leder till
-   sidan med alla omdömen — inte till resten av en mening.
+   Knappen "Läs alla omdömen" under korten står kvar. Den leder till
+   sidan med alla omdömen — inte till resten av en avklippt mening.
 
    Blocket ligger sist i filen med flit: det ska väga tyngre än
    karusellreglerna längre upp.
@@ -403,11 +402,26 @@ img[width][height] { height: auto; }
 [data-omdomeslank]:hover { text-decoration: underline; }
 
 @media (max-width: 900px) {
-  /* Varje kort är så högt som sin egen text, inte så högt som det
-     längsta. Med sträckta kort fick det kortaste omdömet 600 px tom
-     kortyta under sig; nu slutar kortet där texten slutar och resten är
-     sidans bakgrund. */
-  [data-karusell][data-karusell][data-karusell] { align-items: start !important; }
+  /* Ingen karusell på små skärmar heller.
+
+     En karusell lägger alla fyra korten i EN rad, och en rad är lika hög
+     som sitt högsta kort. Marijas kort är 1022 px; de andra tre är runt
+     550. Antingen sträcks de korta till 1022 px och får 500 px tom
+     kortyta, eller så slutar de där texten slutar och lämnar ett lika
+     stort tomt hål under sig. Båda såg trasiga ut.
+
+     Staplade under varandra finns problemet inte: varje kort är så högt
+     som sin egen text, och nästa kort börjar direkt efter. */
+  [data-karusell][data-karusell][data-karusell] {
+    grid-auto-flow: row !important;
+    grid-template-columns: 1fr !important;
+    grid-auto-columns: auto !important;
+    align-items: start !important;
+    overflow-x: visible !important;
+    scroll-snap-type: none !important;
+    gap: 24px !important;
+    padding-inline: 24px !important;
+  }
   [data-omdomeslank] { padding-inline: 24px; }
 }
 
