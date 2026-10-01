@@ -1,26 +1,30 @@
 /**
- * Språkparet för utlandssidan + två hygienrättningar för hela sajten.
- * ===================================================================
+ * Remissidorna (svensk + engelsk) och städning av menysidan.
+ * =========================================================
  *
  * Körs i sajtens rot:  node kor-sprak.mjs
  *
- * 1. Bygger den engelska utlandssidan ur skalet från en redan byggd sida.
- * 2. Lägger hreflang och språkväxlare på den svenska systersidan.
- * 3. lang="sv" på alla sidor som saknar det (den engelska sätter "en" själv).
- * 4. canonical och hreflang skrivs som fullständiga adresser.
- * 5. Den engelska adressen in i sitemap.xml.
+ * 1. Bygger /pages/fertilitetplus-x-utlandsbehandling (sv) och …-en (en)
+ *    ur skalet från en redan byggd sida.
+ * 2. Tar bort språkväxel och hreflang från
+ *    /pages/provtagning-infor-behandling-utomlands — den är en egen sida
+ *    i menyn, inte den svenska halvan av paret, och ska stå orörd.
+ * 3. lang="sv" på alla sidor som saknar det.
+ * 4. canonical och hreflang som fullständiga adresser.
+ * 5. Båda remissidorna in i sitemap.xml.
  *
- * Allt är idempotent — körs den två gånger händer ingenting andra gången.
- * Samma steg finns i byggkedjan (bygg-live.mjs, kor-live.mjs), så nästa
- * fulla bygge från Claude Design ger samma resultat utan den här filen.
+ * Allt är idempotent. Samma steg finns i byggkedjan (bygg-live.mjs,
+ * kor-live.mjs), så nästa fulla bygge från Claude Design ger samma
+ * resultat utan den här filen.
  */
 
 import fs from "node:fs/promises";
 import path from "node:path";
-import { byggUtlandssidanEn, kopplaSvenskaSidan, ADRESS } from "./bygg-utlandssidan-en.mjs";
+import { byggUtlandssidorna, taBortSprakvaxel, ADRESSER } from "./bygg-utlandssidorna.mjs";
 
 const ROT = process.argv[2] ?? ".";
 const DOMAN = "https://fertilitetplus.se";
+const MENYSIDAN = "/pages/provtagning-infor-behandling-utomlands";
 
 async function* htmlfiler(katalog) {
   for (const p of await fs.readdir(katalog, { withFileTypes: true })) {
@@ -32,10 +36,11 @@ async function* htmlfiler(katalog) {
 }
 
 /* ---- 1 & 2 ------------------------------------------------------- */
-const en = await byggUtlandssidanEn(ROT);
-const sv = await kopplaSvenskaSidan(ROT);
-console.log(`engelsk sida:        ${en.fil} (${en.storlek} tecken)`);
-console.log(`svenska systersidan: ${sv.resultat}`);
+for (const s of await byggUtlandssidorna(ROT)) {
+  console.log(`remissida ${s.sprak}:       ${s.fil} (${s.storlek} tecken)`);
+}
+const stadat = await taBortSprakvaxel(ROT, MENYSIDAN);
+console.log(`menysidan städad:    ${stadat.resultat}`);
 
 /* ---- 3 & 4 ------------------------------------------------------- */
 let langSatt = 0;
@@ -63,15 +68,18 @@ console.log(`canonical lagade:    ${canonicalLagad}`);
 /* ---- 5 ----------------------------------------------------------- */
 const smFil = path.join(ROT, "sitemap.xml");
 let sm = await fs.readFile(smFil, "utf8");
-const loc = `${DOMAN}${ADRESS}`;
-if (sm.includes(loc)) {
-  console.log("sitemap:             adressen fanns redan");
-} else {
-  const datum = new Date().toISOString().slice(0, 10);
+const datum = new Date().toISOString().slice(0, 10);
+let tillagda = 0;
+for (const adress of ADRESSER) {
+  const loc = `${DOMAN}${adress}`;
+  /* Hela <loc>-elementet jamfors, inte adressen som delstrang: den
+     svenska adressen ar en prefix av den engelska. */
+  if (sm.includes("<loc>" + loc + "</loc>")) continue;
   sm = sm.replace(
     "</urlset>",
     `  <url>\n    <loc>${loc}</loc>\n    <lastmod>${datum}</lastmod>\n  </url>\n</urlset>`
   );
-  await fs.writeFile(smFil, sm, "utf8");
-  console.log("sitemap:             engelska adressen tillagd");
+  tillagda++;
 }
+if (tillagda) await fs.writeFile(smFil, sm, "utf8");
+console.log(`sitemap:             ${tillagda} nya adresser`);
