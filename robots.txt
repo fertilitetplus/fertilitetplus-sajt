@@ -1,5 +1,4 @@
-# FÖRHANDSVISNING — inte den skarpa sajten.
-# Sidorna har noindex i koden. Genomsökning tillåts med flit: utan den
-# kan sökmotorn inte läsa noindex, och kan då indexera adressen ändå.
 User-agent: *
 Allow: /
+
+Sitemap: https://fertilitetplus.se/sitemap.xml
