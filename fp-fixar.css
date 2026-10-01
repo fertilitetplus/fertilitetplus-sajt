@@ -436,9 +436,11 @@ img[width][height] { height: auto; }
   transform: translateY(-50%);
   transition: opacity .15s;
 }
-[data-omdomespil]:hover:not(:disabled) { color: rgb(126, 150, 128); }
+/* Pilen byter inte färg vid hover. Den ska se likadan ut hela tiden. */
 [data-omdomespil]:disabled { opacity: 0; pointer-events: none; }
-[data-omdomespil]:focus-visible { outline: 2px solid rgb(126, 150, 128); outline-offset: 2px; }
+/* Fokusringen finns kvar för den som navigerar med tangentbord, men i
+   pilens egen färg — inget på knappen blir grönt. */
+[data-omdomespil]:focus-visible { outline: 2px solid rgb(58, 53, 48); outline-offset: 2px; }
 
 /* Länken under korten. */
 [data-omdomeslank] {
