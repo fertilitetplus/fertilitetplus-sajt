@@ -419,16 +419,14 @@ img[width][height] { height: auto; }
 }
 [data-omdomesrad][data-kan-scrolla="nej"] [data-omdomesknappar] { display: none; }
 
+/* Bara pilen, ingen cirkel. Ytan är ändå 44 px så att den går att träffa
+   med tummen — det är bakgrunden som är borta, inte träffytan. */
 [data-omdomespil] {
   pointer-events: auto;
   width: 44px;
   height: 44px;
-  border-radius: 50%;
-  border: 1px solid rgba(58, 53, 48, 0.12);
-  /* Pilen ligger ibland över ett foto, ibland över kortets sandfärg.
-     Bakgrunden måste täcka båda. */
-  background: rgba(248, 246, 242, 0.94);
-  box-shadow: 0 1px 6px rgba(58, 53, 48, 0.12);
+  border: 0;
+  background: transparent;
   color: rgb(58, 53, 48);
   display: inline-flex;
   align-items: center;
@@ -436,9 +434,9 @@ img[width][height] { height: auto; }
   cursor: pointer;
   padding: 0;
   transform: translateY(-50%);
-  transition: opacity .15s, background-color .15s;
+  transition: opacity .15s;
 }
-[data-omdomespil]:hover:not(:disabled) { background: rgb(255, 255, 255); }
+[data-omdomespil]:hover:not(:disabled) { color: rgb(126, 150, 128); }
 [data-omdomespil]:disabled { opacity: 0; pointer-events: none; }
 [data-omdomespil]:focus-visible { outline: 2px solid rgb(126, 150, 128); outline-offset: 2px; }
 
@@ -521,16 +519,21 @@ img[width][height] { height: auto; }
   [data-omdomeskort]:nth-of-type(3) { display: none !important; }
 }
 
-/* ORDNINGEN.
-   Marijas omdöme är dubbelt så långt som de andra och sätter hela radens
-   höjd. Som första kort möttes man av en vägg text; som nummer två har
-   man redan läst ett kort och vet vad man tittar på. Ordningen sätts med
-   `order` och inte i markupen, eftersom markupen kommer från Claude
-   Design och skrivs över vid varje bygge. */
-[data-omdomeskort]:nth-of-type(1) { order: 1; }
-[data-omdomeskort]:nth-of-type(3) { order: 2; }
-[data-omdomeskort]:nth-of-type(2) { order: 3; }
-[data-omdomeskort]:nth-of-type(4) { order: 4; }
+/* ORDNINGEN: det längsta omdömet sist.
+
+   I 2×2-rutnätet på dator är korten i en rad olika höga, och det korta
+   kortet slutar där texten slutar. Låg det långa omdömet som nummer två
+   blev det ett hål mitt i rutnätet, under kortet bredvid. Sist blir den
+   ojämna kanten i stället rutnätets underkant, där den läses som ett
+   avslut och inte som ett fel.
+
+   En enda regel räcker: alla kort har order 0 från början, så det kort
+   som får order 1 hamnar sist och de övriga behåller sin inbördes
+   ordning. Ordningen sätts i CSS och inte i markupen, eftersom markupen
+   kommer från Claude Design och skrivs över vid varje bygge.
+
+   På mobil är kortet dolt, så regeln gör ingen skillnad där. */
+[data-omdomeskort]:nth-of-type(3) { order: 1; }
 
 @media (min-width: 901px) {
   /* Ingen karusell: fyra kort, två kolumner, allt synligt. */
