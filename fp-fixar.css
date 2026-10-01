@@ -389,10 +389,41 @@ img[width][height] { height: auto; }
    Knappen under korten är kvar — den leder till sidan med alla omdömen,
    inte till resten av ett avklippt stycke. */
 
+/* Raden under korten: länken till vänster, pilarna till höger. Raden
+   byggs av fp-omdomen.js — finns inte skriptet står länken ensam, och
+   stilarna nedan skadar inget. */
+[data-omdomesrad] {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin: 32px 0 0;
+}
+[data-omdomesknappar] { display: flex; gap: 10px; }
+[data-omdomesrad][data-kan-scrolla="nej"] [data-omdomesknappar] { display: none; }
+
+[data-omdomespil] {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid rgb(200, 181, 162);
+  background: transparent;
+  color: rgb(58, 53, 48);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  transition: background-color .15s, opacity .15s;
+}
+[data-omdomespil]:hover:not(:disabled) { background: rgb(235, 231, 225); }
+[data-omdomespil]:disabled { opacity: .3; cursor: default; }
+[data-omdomespil]:focus-visible { outline: 2px solid rgb(126, 150, 128); outline-offset: 2px; }
+
 /* Länken under korten. */
 [data-omdomeslank] {
   display: block;
-  margin: 32px 0 0;
+  margin: 0;
   font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.04em;
@@ -402,28 +433,51 @@ img[width][height] { height: auto; }
 [data-omdomeslank]:hover { text-decoration: underline; }
 
 @media (max-width: 900px) {
-  /* Ingen karusell på små skärmar heller.
+  /* Karusellen är kvar här: ett omdöme i taget är rätt på en telefon.
 
-     En karusell lägger alla fyra korten i EN rad, och en rad är lika hög
-     som sitt högsta kort. Marijas kort är 1022 px; de andra tre är runt
-     550. Antingen sträcks de korta till 1022 px och får 500 px tom
-     kortyta, eller så slutar de där texten slutar och lämnar ett lika
-     stort tomt hål under sig. Båda såg trasiga ut.
+     Priset är att alla fyra korten ligger i EN rad, och en rad är lika
+     hög som sitt högsta kort. Tre saker håller den höjden nere:
 
-     Staplade under varandra finns problemet inte: varje kort är så högt
-     som sin egen text, och nästa kort börjar direkt efter. */
-  [data-karusell][data-karusell][data-karusell] {
-    grid-auto-flow: row !important;
-    grid-template-columns: 1fr !important;
-    grid-auto-columns: auto !important;
-    align-items: start !important;
-    overflow-x: visible !important;
-    scroll-snap-type: none !important;
-    gap: 24px !important;
-    padding-inline: 24px !important;
+     1. Mindre text i just omdömena (14px/1.6 i stället för 16/1.75).
+        Det är det enda stället på sajten där storleken ändras.
+     2. Bilden får ta den höjd som blir över i de korta korten, i stället
+        för att lämna tom kortyta i botten. Den har tak så att den inte
+        beskärs till en smal remsa.
+     3. Det längsta omdömet ligger som nummer två (se ORDNINGEN nedan),
+        så att det första kortet man möter är ett kort man hinner läsa. */
+  [data-karusell][data-karusell][data-karusell] { align-items: stretch !important; }
+
+  [data-omdomestext] {
+    display: flex !important;
+    flex-direction: column !important;
+    flex: none !important;
   }
-  [data-omdomeslank] { padding-inline: 24px; }
+  [data-omdomestext] > p + p {
+    font-size: 14px !important;
+    line-height: 1.6 !important;
+  }
+
+  /* Bilden tar överskottet. min/max håller den inom rimliga proportioner
+     — utan tak blev det kortaste omdömets bild en 500 px hög remsa. */
+  [data-omdomesbild] {
+    flex: 1 1 auto !important;
+    height: auto !important;
+    min-height: 150px !important;
+  }
+
+  [data-omdomesrad] { padding-inline: 24px; }
 }
+
+/* ORDNINGEN.
+   Marijas omdöme är dubbelt så långt som de andra och sätter hela radens
+   höjd. Som första kort möttes man av en vägg text; som nummer två har
+   man redan läst ett kort och vet vad man tittar på. Ordningen sätts med
+   `order` och inte i markupen, eftersom markupen kommer från Claude
+   Design och skrivs över vid varje bygge. */
+[data-omdomeskort]:nth-of-type(1) { order: 1; }
+[data-omdomeskort]:nth-of-type(3) { order: 2; }
+[data-omdomeskort]:nth-of-type(2) { order: 3; }
+[data-omdomeskort]:nth-of-type(4) { order: 4; }
 
 @media (min-width: 901px) {
   /* Ingen karusell: fyra kort, två kolumner, allt synligt. */
